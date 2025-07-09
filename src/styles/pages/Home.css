@@ -1,0 +1,269 @@
+/* Home Page Styles */
+
+/* Hero Section with Background Image */
+.hero-section {
+  position: relative;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: white;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+}
+
+.hero-section .container {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-section .page-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-section .page-subtitle {
+  font-size: 1.3rem;
+  margin-bottom: 30px;
+  line-height: 1.6;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  max-width: 800px;
+}
+
+/* Image Gallery Section */
+.gallery-section {
+  margin: 80px 0;
+}
+
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.gallery-item {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  aspect-ratio: 4/3;
+}
+
+.gallery-item.large {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.gallery-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.gallery-item:hover .gallery-image {
+  transform: scale(1.05);
+}
+
+.gallery-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  color: white;
+  padding: 30px 20px 20px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.gallery-item:hover .gallery-overlay {
+  transform: translateY(0);
+}
+
+.gallery-overlay h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.gallery-overlay p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.hero-actions {
+  margin-top: 30px;
+}
+
+.quick-join-form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.quick-join-form input,
+.quick-join-form select,
+.quick-join-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.quick-join-form input:focus,
+.quick-join-form select:focus,
+.quick-join-form textarea:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+.quick-join-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.quick-join-form .form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.programmes-section {
+  margin: 60px 0;
+}
+
+.join-section {
+  margin: 60px 0;
+}
+
+.final-cta {
+  margin: 60px 0;
+}
+
+.final-cta .card {
+  text-align: center;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+}
+
+.final-cta h2 {
+  color: white;
+  margin-bottom: 20px;
+}
+
+.final-cta p {
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.programme-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.programme-subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.video-title {
+  color: var(--text-primary);
+  margin-bottom: 5px;
+  text-align: center;
+  margin-top: 15px;
+}
+
+.video-description {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.cta-link-white {
+  background: white;
+  color: var(--primary-color);
+  margin-right: 15px;
+}
+
+.cta-link-outline {
+  background: transparent;
+  border: 2px solid white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 60vh;
+    background-attachment: scroll;
+  }
+
+  .hero-section .page-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-section .page-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .cta-button {
+    margin: 0 !important;
+    width: 200px;
+    text-align: center;
+  }
+
+  .image-gallery {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .gallery-item.large {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+
+  .quick-join-form .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .final-cta .cta-button {
+    display: block;
+    margin: 10px auto !important;
+    width: 200px;
+  }
+} 

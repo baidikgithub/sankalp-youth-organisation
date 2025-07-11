@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import '../styles/pages/Home.css';
@@ -12,6 +12,8 @@ import home5 from '../assets/home/home5.jpg';
 import home6 from '../assets/home/home6.jpg';
 import home8 from '../assets/home/home8.jpg';
 import home10 from '../assets/home/home10.jpg';
+
+const heroImages = [home1, home2, home3, home4, home5, home6, home8, home10];
 
 const Home = () => {
   const [formData, setFormData] = useState({
@@ -33,6 +35,16 @@ const Home = () => {
     // Reset form
     setFormData({ name: '', email: '', phone: '', interest: '', message: '' });
   };
+
+  // Add state for hero image slider
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHeroIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+    }, 3000); // Change image every 3 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   // Impact metrics inspired by Smile Foundation
   const impactMetrics = [
@@ -133,7 +145,7 @@ const Home = () => {
       {/* Hero Section */}
       <motion.section
         className="hero-section"
-        style={{ backgroundImage: `url(${home1})` }}
+        style={{ backgroundImage: `url(${heroImages[currentHeroIndex]})` }}
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}

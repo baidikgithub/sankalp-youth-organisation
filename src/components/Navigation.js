@@ -35,6 +35,7 @@ const Navigation = () => {
     { path: '/payment', label: 'Payment' },
     { path: '/contact', label: 'Contact' },
     { path: '/join', label: 'Join' },
+    { path: '/admin', label: 'Admin', isAdmin: true },
   ];
 
   return (
@@ -63,7 +64,7 @@ const Navigation = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
+              className={`nav-link ${location.pathname === item.path ? 'active' : ''} ${item.isAdmin ? 'admin-link' : ''}`}
               onClick={closeMenu}
             >
               {item.label}

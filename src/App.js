@@ -11,6 +11,10 @@ import Payment from './pages/Payment';
 import Coupons from './pages/Coupons';
 import Collaborations from './pages/Collaborations';
 import Footer from './components/Footer';
+import AdminLayout from './components/AdminLayout';
+import Dashboard from './pages/admin/Dashboard';
+import Settings from './pages/admin/Settings';
+import Members from './pages/admin/Members';
 import './styles/global/App.css';
 
 function App() {
@@ -32,6 +36,23 @@ function App() {
             <Route path="/join" element={<JoinUs />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/coupons" element={<Coupons />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={
+              <AdminLayout>
+                <Dashboard />
+              </AdminLayout>
+            } />
+            <Route path="/admin/settings" element={
+              <AdminLayout>
+                <Settings />
+              </AdminLayout>
+            } />
+            <Route path="/admin/members" element={
+              <AdminLayout>
+                <Members />
+              </AdminLayout>
+            } />
           </Routes>
         </motion.main>
         <Footer />

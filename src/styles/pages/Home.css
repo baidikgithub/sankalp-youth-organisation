@@ -8,8 +8,10 @@
   align-items: center;
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: white;
+  width: 100%;
+  overflow: hidden;
 }
 
 .hero-overlay {
@@ -62,6 +64,7 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   aspect-ratio: 4/3;
+  min-height: 250px;
 }
 
 .gallery-item.large {
@@ -79,6 +82,7 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  display: block;
 }
 
 .gallery-item:hover .gallery-image {

@@ -15,6 +15,9 @@ import AdminLayout from './components/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
 import Settings from './pages/admin/Settings';
 import Members from './pages/admin/Members';
+import AdminEvents from './pages/admin/Events';
+import Donations from './pages/admin/Donations';
+import Reports from './pages/admin/Reports';
 import './styles/global/App.css';
 
 function App() {
@@ -51,6 +54,21 @@ function App() {
             <Route path="/admin/members" element={
               <AdminLayout>
                 <Members />
+              </AdminLayout>
+            } />
+            <Route path="/admin/events" element={
+              <AdminLayout>
+                <AdminEvents />
+              </AdminLayout>
+            } />
+            <Route path="/admin/donations" element={
+              <AdminLayout>
+                <Donations />
+              </AdminLayout>
+            } />
+            <Route path="/admin/reports" element={
+              <AdminLayout>
+                <Reports />
               </AdminLayout>
             } />
           </Routes>

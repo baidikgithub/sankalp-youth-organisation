@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import '../../styles/pages/admin/Members.css';
+import { message, Space, Typography } from 'antd';
+import MemberTable from '../../components/MemberTable';
+import AddMemberForm from '../../components/AddMemberForm';
+import MemberFilters from '../../components/MemberFilters';
+import MemberStats from '../../components/MemberStats';
+
+const { Title } = Typography;
 
 const Members = () => {
   const [members, setMembers] = useState([
@@ -46,244 +51,155 @@ const Members = () => {
     }
   ]);
 
+  // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
+  
+  // Form states
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newMember, setNewMember] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    role: 'Member',
-    location: ''
-  });
+  const [editingMember, setEditingMember] = useState(null);
+  const [loading, setLoading] = useState(false);
 
+  // Filter members based on search and filters
   const filteredMembers = members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         member.email.toLowerCase().includes(searchTerm.toLowerCase());
+                         member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         member.phone.includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || member.status === statusFilter;
     const matchesRole = roleFilter === 'all' || member.role === roleFilter;
     
     return matchesSearch && matchesStatus && matchesRole;
   });
 
-  const handleAddMember = (e) => {
-    e.preventDefault();
-    const member = {
-      id: members.length + 1,
-      ...newMember,
-      joinDate: new Date().toISOString().split('T')[0],
-      status: 'active'
-    };
-    setMembers([...members, member]);
-    setNewMember({ name: '', email: '', phone: '', role: 'Member', location: '' });
-    setShowAddForm(false);
+  // Handle adding new member
+  const handleAddMember = async (values) => {
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const newMember = {
+        id: Math.max(...members.map(m => m.id), 0) + 1,
+        ...values,
+        joinDate: new Date().toISOString().split('T')[0],
+        status: 'active'
+      };
+      
+      setMembers(prev => [...prev, newMember]);
+      setShowAddForm(false);
+      message.success('Member added successfully!');
+    } catch (error) {
+      message.error('Failed to add member. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleStatusChange = (memberId, newStatus) => {
-    setMembers(members.map(member => 
-      member.id === memberId ? { ...member, status: newStatus } : member
-    ));
+  // Handle editing member
+  const handleEditMember = async (values) => {
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setMembers(prev => prev.map(member => 
+        member.id === editingMember.id 
+          ? { ...member, ...values }
+          : member
+      ));
+      
+      setEditingMember(null);
+      message.success('Member updated successfully!');
+    } catch (error) {
+      message.error('Failed to update member. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle status change
+  const handleStatusChange = async (memberId, newStatus) => {
+    try {
+      setMembers(prev => prev.map(member => 
+        member.id === memberId 
+          ? { ...member, status: newStatus }
+          : member
+      ));
+      
+      message.success(`Member ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully!`);
+    } catch (error) {
+      message.error('Failed to update member status. Please try again.');
+    }
+  };
+
+  // Handle edit button click
+  const handleEditClick = (member) => {
+    setEditingMember(member);
+  };
+
+  // Handle form cancel
+  const handleFormCancel = () => {
+    setShowAddForm(false);
+    setEditingMember(null);
   };
 
   return (
-    <div className="admin-members">
-      <div className="members-header">
-        <h1>Members Management</h1>
-        <p>Manage organization members and volunteers</p>
-      </div>
+    <div style={{ 
+      background: '#f5f5f5', 
+      minHeight: 'calc(100vh - 70px)',
+      padding: '0'
+    }}>
 
-      {/* Filters and Search */}
-      <div className="members-controls">
-        <div className="search-section">
-          <input
-            type="text"
-            placeholder="Search members..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
-        
-        <div className="filters-section">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+      {/* Main Content */}
+      <div style={{ padding: '0 24px 24px' }}>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          {/* Member Statistics */}
+          <MemberStats members={members} />
           
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Roles</option>
-            <option value="Member">Member</option>
-            <option value="Volunteer">Volunteer</option>
-            <option value="Admin">Admin</option>
-          </select>
-        </div>
-
-        <button
-          className="add-member-btn"
-          onClick={() => setShowAddForm(true)}
-        >
-          + Add Member
-        </button>
-      </div>
-
-      {/* Add Member Form */}
-      {showAddForm && (
-        <motion.div
-          className="add-member-form"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <h3>Add New Member</h3>
-          <form onSubmit={handleAddMember}>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Name</label>
-                <input
-                  type="text"
-                  value={newMember.name}
-                  onChange={(e) => setNewMember({...newMember, name: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Email</label>
-                <input
-                  type="email"
-                  value={newMember.email}
-                  onChange={(e) => setNewMember({...newMember, email: e.target.value})}
-                  required
-                />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Phone</label>
-                <input
-                  type="tel"
-                  value={newMember.phone}
-                  onChange={(e) => setNewMember({...newMember, phone: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Role</label>
-                <select
-                  value={newMember.role}
-                  onChange={(e) => setNewMember({...newMember, role: e.target.value})}
-                >
-                  <option value="Member">Member</option>
-                  <option value="Volunteer">Volunteer</option>
-                  <option value="Admin">Admin</option>
-                </select>
-              </div>
-            </div>
-            <div className="form-group">
-              <label>Location</label>
-              <input
-                type="text"
-                value={newMember.location}
-                onChange={(e) => setNewMember({...newMember, location: e.target.value})}
-                required
-              />
-            </div>
-            <div className="form-actions">
-              <button type="submit" className="save-btn">Add Member</button>
-              <button type="button" className="cancel-btn" onClick={() => setShowAddForm(false)}>
-                Cancel
-              </button>
-            </div>
-          </form>
-        </motion.div>
-      )}
-
-      {/* Members Table */}
-      <div className="members-table-container">
-        <table className="members-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Role</th>
-              <th>Location</th>
-              <th>Join Date</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredMembers.map((member) => (
-              <motion.tr
-                key={member.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <td>{member.name}</td>
-                <td>{member.email}</td>
-                <td>{member.phone}</td>
-                <td>
-                  <span className={`role-badge ${member.role.toLowerCase()}`}>
-                    {member.role}
-                  </span>
-                </td>
-                <td>{member.location}</td>
-                <td>{new Date(member.joinDate).toLocaleDateString()}</td>
-                <td>
-                  <span className={`status-badge ${member.status}`}>
-                    {member.status}
-                  </span>
-                </td>
-                <td>
-                  <div className="action-buttons">
-                    <button
-                      className={`status-toggle ${member.status === 'active' ? 'deactivate' : 'activate'}`}
-                      onClick={() => handleStatusChange(member.id, member.status === 'active' ? 'inactive' : 'active')}
-                    >
-                      {member.status === 'active' ? 'Deactivate' : 'Activate'}
-                    </button>
-                    <button className="edit-btn">Edit</button>
-                  </div>
-                </td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Summary Stats */}
-      <div className="members-summary">
-        <div className="summary-card">
-          <h3>Total Members</h3>
-          <p>{members.length}</p>
-        </div>
-        <div className="summary-card">
-          <h3>Active Members</h3>
-          <p>{members.filter(m => m.status === 'active').length}</p>
-        </div>
-        <div className="summary-card">
-          <h3>Volunteers</h3>
-          <p>{members.filter(m => m.role === 'Volunteer').length}</p>
-        </div>
-        <div className="summary-card">
-          <h3>New This Month</h3>
-          <p>{members.filter(m => {
-            const joinDate = new Date(m.joinDate);
-            const now = new Date();
-            return joinDate.getMonth() === now.getMonth() && joinDate.getFullYear() === now.getFullYear();
-          }).length}</p>
-        </div>
+          {/* Filters and Search */}
+          <MemberFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            roleFilter={roleFilter}
+            onRoleFilterChange={setRoleFilter}
+            onAddMember={() => setShowAddForm(true)}
+          />
+          
+          {/* Members Table */}
+          <div style={{ 
+            background: 'white',
+            borderRadius: '8px',
+            overflow: 'hidden'
+          }}>
+            <MemberTable
+              members={filteredMembers}
+              onStatusChange={handleStatusChange}
+              onEdit={handleEditClick}
+            />
+          </div>
+          
+          {/* Add Member Form Modal */}
+          <AddMemberForm
+            visible={showAddForm}
+            onCancel={handleFormCancel}
+            onSubmit={handleAddMember}
+            loading={loading}
+            title="Add New Member"
+          />
+          
+          {/* Edit Member Form Modal */}
+          <AddMemberForm
+            visible={!!editingMember}
+            onCancel={handleFormCancel}
+            onSubmit={handleEditMember}
+            loading={loading}
+            initialValues={editingMember}
+            title="Edit Member"
+          />
+        </Space>
       </div>
     </div>
   );

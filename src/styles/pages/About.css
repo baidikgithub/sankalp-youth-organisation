@@ -2,6 +2,8 @@
 
 .about-page {
   width: 100%;
+  min-height: 100vh;
+  background: var(--bg-primary);
 }
 
 /* Hero Section */
@@ -12,6 +14,7 @@
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
+  background-repeat: no-repeat;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -87,6 +90,7 @@
 .mission-vision-section {
   padding: 100px 0;
   background: var(--bg-primary);
+  width: 100%;
 }
 
 .mission-vision-card {
@@ -162,8 +166,10 @@
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
+  background-repeat: no-repeat;
   padding: 100px 0;
   margin: 60px 0;
+  width: 100%;
 }
 
 .impact-overlay {
@@ -230,6 +236,7 @@
 .focus-areas-section {
   padding: 100px 0;
   background: var(--bg-primary);
+  width: 100%;
 }
 
 .section-title.center {
@@ -348,6 +355,7 @@
 .leadership-section {
   padding: 100px 0;
   background: var(--bg-secondary);
+  width: 100%;
 }
 
 .leadership-header {
@@ -495,6 +503,7 @@
 .cta-section {
   padding: 80px 0;
   background: var(--bg-secondary);
+  width: 100%;
 }
 
 .cta-card {

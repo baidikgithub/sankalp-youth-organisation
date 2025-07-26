@@ -1,17 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Layout } from 'antd';
 import AdminNavigation from './AdminNavigation';
-import '../styles/components/AdminLayout.css';
+import AdminFooter from './AdminFooter';
+
+const { Content } = Layout;
 
 const AdminLayout = ({ children }) => {
+  const [collapsed, setCollapsed] = useState(false);
+
+  const handleCollapse = () => {
+    setCollapsed(!collapsed);
+  };
+
   return (
-    <div className="admin-layout">
-      <AdminNavigation />
-      <main className="admin-main">
-        <div className="admin-content">
+    <AdminNavigation collapsed={collapsed} onCollapse={handleCollapse}>
+      <Layout style={{ minHeight: '100vh' }}>
+        <Content
+          style={{
+            margin: '24px 24px 0',
+            padding: '24px',
+            background: '#fff',
+            borderRadius: '8px',
+            flex: 1,
+            overflow: 'auto'
+          }}
+        >
           {children}
-        </div>
-      </main>
-    </div>
+        </Content>
+        <AdminFooter />
+      </Layout>
+    </AdminNavigation>
   );
 };
 

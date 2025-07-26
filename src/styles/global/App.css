@@ -23,6 +23,34 @@
   --accent-dark: #1e7e34;
 }
 
+/* Admin Page Overrides */
+.admin-page-body {
+  background: #f0f2f5 !important;
+  background-attachment: initial !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+.admin-page-root {
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Ensure admin pages take full height without scrollbars */
+.admin-layout .ant-layout {
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+.admin-layout .ant-layout-content {
+  overflow-y: auto !important;
+  height: calc(100vh - 64px - 80px) !important; /* Subtract header and footer height */
+}
+
 [data-theme="light"] {
   --bg-primary: #ffffff;
   --bg-secondary: rgba(255, 255, 255, 0.95);
@@ -88,14 +116,17 @@ body {
 main {
   flex: 1;
   padding-top: 80px; /* Account for fixed navigation */
-  padding-bottom: 100px; /* Account for footer */
+  padding-bottom: 0; /* Remove bottom padding to prevent gaps */
+  overflow-x: hidden; /* Prevent horizontal scrolling from full-width sections */
+  background: var(--bg-primary);
 }
 
 /* Page containers */
 .page-container {
-  min-height: calc(100vh - 180px);
+  min-height: 100vh;
   padding: 40px 20px;
   background: var(--bg-primary);
+  width: 100%;
 }
 
 .page-header {
@@ -146,6 +177,7 @@ main {
   margin: 40px 0;
   box-shadow: 0 10px 30px var(--shadow-light);
   border: 1px solid var(--border-color);
+  width: 100%;
 }
 
 .impact-grid {
@@ -188,6 +220,9 @@ main {
 .video-section {
   margin: 40px 0;
   text-align: center;
+  width: 100%;
+  background: var(--bg-primary);
+  padding: 60px 0;
 }
 
 .video-container {

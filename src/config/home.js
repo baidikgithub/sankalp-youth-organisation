@@ -7,9 +7,22 @@ import home5 from '../assets/home/home5.jpg';
 import home6 from '../assets/home/home6.jpg';
 import home8 from '../assets/home/home8.jpg';
 import home10 from '../assets/home/home10.jpg';
+// Add new community hero image (once you have the image file)
+// import communityHero from '../assets/home/community-hero.jpg';
 
 // Hero images for slider
-export const heroImages = [home1, home2, home3, home4, home5, home6, home8, home10];
+export const heroImages = [
+  home1, 
+  home2, 
+  home3, 
+  home4, 
+  home5, 
+  home6, 
+  home8, 
+  home10
+  // Add the new community hero image to the rotation once available
+  // communityHero
+];
 
 // Impact metrics inspired by Smile Foundation
 export const impactMetrics = [

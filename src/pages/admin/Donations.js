@@ -1,6 +1,39 @@
 import React, { useState } from 'react';
+import { 
+  Card, 
+  Table, 
+  Input, 
+  Select, 
+  DatePicker, 
+  Button, 
+  Space, 
+  Row, 
+  Col, 
+  Statistic, 
+  Tag, 
+  Typography, 
+  Tooltip,
+  Drawer,
+  Descriptions,
+  Modal,
+  message
+} from 'antd';
+import { 
+  SearchOutlined, 
+  ExportOutlined, 
+  EyeOutlined, 
+  EditOutlined, 
+  CheckOutlined,
+  DollarOutlined,
+  ClockCircleOutlined,
+  BarChartOutlined,
+  CheckCircleOutlined
+} from '@ant-design/icons';
 import { motion } from 'framer-motion';
-import '../../styles/pages/admin/Donations.css';
+
+const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 
 const Donations = () => {
   const [donations, setDonations] = useState([
@@ -71,28 +104,34 @@ const Donations = () => {
     }
   ]);
 
+  const [filteredDonations, setFilteredDonations] = useState(donations);
+  const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [dateRange, setDateRange] = useState(null);
+  const [selectedDonation, setSelectedDonation] = useState(null);
+  const [drawerVisible, setDrawerVisible] = useState(false);
 
-  const filteredDonations = donations.filter(donation => {
-    const matchesSearch = donation.donorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         donation.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         donation.transactionId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || donation.status === statusFilter;
-    const matchesCategory = categoryFilter === 'all' || donation.category === categoryFilter;
-    
-    let matchesDate = true;
-    if (dateRange.start && dateRange.end) {
-      const donationDate = new Date(donation.date);
-      const startDate = new Date(dateRange.start);
-      const endDate = new Date(dateRange.end);
-      matchesDate = donationDate >= startDate && donationDate <= endDate;
-    }
-    
-    return matchesSearch && matchesStatus && matchesCategory && matchesDate;
-  });
+  // Filter donations based on search and filters
+  React.useEffect(() => {
+    let filtered = donations.filter(donation => {
+      const matchesSearch = donation.donorName.toLowerCase().includes(searchText.toLowerCase()) ||
+                           donation.email.toLowerCase().includes(searchText.toLowerCase()) ||
+                           donation.transactionId.toLowerCase().includes(searchText.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || donation.status === statusFilter;
+      const matchesCategory = categoryFilter === 'all' || donation.category === categoryFilter;
+      
+      let matchesDate = true;
+      if (dateRange && dateRange.length === 2) {
+        const donationDate = new Date(donation.date);
+        const [startDate, endDate] = dateRange;
+        matchesDate = donationDate >= startDate && donationDate <= endDate;
+      }
+      
+      return matchesSearch && matchesStatus && matchesCategory && matchesDate;
+    });
+    setFilteredDonations(filtered);
+  }, [donations, searchText, statusFilter, categoryFilter, dateRange]);
 
   const totalAmount = donations
     .filter(d => d.status === 'completed')
@@ -104,20 +143,20 @@ const Donations = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed': return '#28A745';
-      case 'pending': return '#FFC107';
-      case 'failed': return '#DC3545';
-      default: return '#6C757D';
+      case 'completed': return 'success';
+      case 'pending': return 'warning';
+      case 'failed': return 'error';
+      default: return 'default';
     }
   };
 
   const getCategoryColor = (category) => {
     switch (category) {
-      case 'General Donation': return '#007BFF';
-      case 'Education Fund': return '#28A745';
-      case 'Health Fund': return '#DC3545';
-      case 'Corporate Donation': return '#6F42C1';
-      default: return '#6C757D';
+      case 'General Donation': return 'blue';
+      case 'Education Fund': return 'green';
+      case 'Health Fund': return 'red';
+      case 'Corporate Donation': return 'purple';
+      default: return 'default';
     }
   };
 
@@ -128,196 +167,319 @@ const Donations = () => {
     }).format(amount);
   };
 
-  return (
-    <div className="admin-donations">
-      <div className="donations-header">
-        <h1>Donations Management</h1>
-        <p>Track and manage all donations received by the organization</p>
+  const handleViewDonation = (donation) => {
+    setSelectedDonation(donation);
+    setDrawerVisible(true);
+  };
+
+  const handleApproveDonation = (donationId) => {
+    setDonations(prev => prev.map(d => 
+      d.id === donationId ? { ...d, status: 'completed' } : d
+    ));
+    message.success('Donation approved successfully!');
+  };
+
+  const handleExport = () => {
+    message.info('Export functionality will be implemented here');
+  };
+
+  const columns = [
+    {
+      title: 'Donor',
+      dataIndex: 'donorName',
+      key: 'donorName',
+      render: (text, record) => (
+        <div>
+          <div style={{ fontWeight: 600, color: '#1890ff' }}>{text}</div>
+          <div style={{ fontSize: '12px', color: '#666' }}>{record.email}</div>
+        </div>
+      ),
+      sorter: (a, b) => a.donorName.localeCompare(b.donorName),
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      render: (amount, record) => (
+        <Text strong style={{ color: '#52c41a', fontSize: '16px' }}>
+          {formatCurrency(amount, record.currency)}
+        </Text>
+      ),
+      sorter: (a, b) => a.amount - b.amount,
+    },
+    {
+      title: 'Category',
+      dataIndex: 'category',
+      key: 'category',
+      render: (category) => (
+        <Tag color={getCategoryColor(category)}>{category}</Tag>
+      ),
+      filters: [
+        { text: 'General Donation', value: 'General Donation' },
+        { text: 'Education Fund', value: 'Education Fund' },
+        { text: 'Health Fund', value: 'Health Fund' },
+        { text: 'Corporate Donation', value: 'Corporate Donation' },
+      ],
+      onFilter: (value, record) => record.category === value,
+    },
+    {
+      title: 'Payment Method',
+      dataIndex: 'paymentMethod',
+      key: 'paymentMethod',
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status) => (
+        <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
+      ),
+      filters: [
+        { text: 'Completed', value: 'completed' },
+        { text: 'Pending', value: 'pending' },
+        { text: 'Failed', value: 'failed' },
+      ],
+      onFilter: (value, record) => record.status === value,
+    },
+    {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date',
+      render: (date) => new Date(date).toLocaleDateString(),
+      sorter: (a, b) => new Date(a.date) - new Date(b.date),
+    },
+    {
+      title: 'Transaction ID',
+      dataIndex: 'transactionId',
+      key: 'transactionId',
+      render: (id) => (
+        <Text code copyable style={{ fontSize: '12px' }}>{id}</Text>
+      ),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (_, record) => (
+        <Space>
+          <Tooltip title="View Details">
+            <Button 
+              type="primary" 
+              size="small" 
+              icon={<EyeOutlined />}
+              onClick={() => handleViewDonation(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Edit">
+            <Button 
+              type="default" 
+              size="small" 
+              icon={<EditOutlined />}
+            />
+          </Tooltip>
+          {record.status === 'pending' && (
+            <Tooltip title="Approve">
+              <Button 
+                type="primary" 
+                size="small" 
+                icon={<CheckOutlined />}
+                style={{ backgroundColor: '#52c41a' }}
+                onClick={() => handleApproveDonation(record.id)}
+              />
+            </Tooltip>
+          )}
+        </Space>
+      ),
+    },
+  ];
+
+    return (
+    <div>
+      {/* Page Header */}
+      <div style={{ marginBottom: '24px' }}>
+        <Title level={2} style={{ marginBottom: '8px', color: '#1890ff' }}>
+          Donations Management
+        </Title>
+        <Text type="secondary" style={{ fontSize: '16px' }}>
+          Track and manage all donations received by the organization
+        </Text>
       </div>
 
       {/* Statistics Cards */}
-      <motion.div 
-        className="donations-stats"
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="stat-card">
-          <div className="stat-icon">💰</div>
-          <div className="stat-content">
-            <h3>{formatCurrency(totalAmount, 'INR')}</h3>
-            <p>Total Received</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">⏳</div>
-          <div className="stat-content">
-            <h3>{formatCurrency(pendingAmount, 'INR')}</h3>
-            <p>Pending Amount</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">📊</div>
-          <div className="stat-content">
-            <h3>{donations.length}</h3>
-            <p>Total Donations</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">✅</div>
-          <div className="stat-content">
-            <h3>{donations.filter(d => d.status === 'completed').length}</h3>
-            <p>Successful</p>
-          </div>
-        </div>
+        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Total Received"
+                value={totalAmount}
+                prefix={<DollarOutlined style={{ color: '#52c41a' }} />}
+                formatter={(value) => formatCurrency(value, 'INR')}
+                valueStyle={{ color: '#52c41a' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Pending Amount"
+                value={pendingAmount}
+                prefix={<ClockCircleOutlined style={{ color: '#faad14' }} />}
+                formatter={(value) => formatCurrency(value, 'INR')}
+                valueStyle={{ color: '#faad14' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Total Donations"
+                value={donations.length}
+                prefix={<BarChartOutlined style={{ color: '#1890ff' }} />}
+                valueStyle={{ color: '#1890ff' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Successful"
+                value={donations.filter(d => d.status === 'completed').length}
+                prefix={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
+                valueStyle={{ color: '#52c41a' }}
+              />
+            </Card>
+          </Col>
+        </Row>
       </motion.div>
 
       {/* Controls */}
-      <div className="donations-controls">
-        <div className="search-section">
-          <input
-            type="text"
-            placeholder="Search by donor name, email, or transaction ID..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
-        
-        <div className="filters-section">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Status</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
-          </select>
-          
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Categories</option>
-            <option value="General Donation">General Donation</option>
-            <option value="Education Fund">Education Fund</option>
-            <option value="Health Fund">Health Fund</option>
-            <option value="Corporate Donation">Corporate Donation</option>
-          </select>
-
-          <div className="date-range">
-            <input
-              type="date"
-              value={dateRange.start}
-              onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
-              className="date-input"
-              placeholder="Start Date"
-            />
-            <span>to</span>
-            <input
-              type="date"
-              value={dateRange.end}
-              onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
-              className="date-input"
-              placeholder="End Date"
-            />
-          </div>
-        </div>
-
-        <button className="export-btn">
-          📊 Export Report
-        </button>
-      </div>
+      <Card style={{ marginBottom: '24px' }}>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+          <Row gutter={[16, 16]} align="middle">
+            <Col xs={24} sm={24} md={8}>
+              <Input
+                placeholder="Search by donor name, email, or transaction ID..."
+                prefix={<SearchOutlined />}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                allowClear
+              />
+            </Col>
+            <Col xs={24} sm={8} md={4}>
+              <Select
+                placeholder="Status"
+                value={statusFilter}
+                onChange={setStatusFilter}
+                style={{ width: '100%' }}
+              >
+                <Option value="all">All Status</Option>
+                <Option value="completed">Completed</Option>
+                <Option value="pending">Pending</Option>
+                <Option value="failed">Failed</Option>
+              </Select>
+            </Col>
+            <Col xs={24} sm={8} md={4}>
+              <Select
+                placeholder="Category"
+                value={categoryFilter}
+                onChange={setCategoryFilter}
+                style={{ width: '100%' }}
+              >
+                <Option value="all">All Categories</Option>
+                <Option value="General Donation">General Donation</Option>
+                <Option value="Education Fund">Education Fund</Option>
+                <Option value="Health Fund">Health Fund</Option>
+                <Option value="Corporate Donation">Corporate Donation</Option>
+              </Select>
+            </Col>
+            <Col xs={24} sm={8} md={4}>
+              <RangePicker
+                onChange={setDateRange}
+                style={{ width: '100%' }}
+                placeholder={['Start Date', 'End Date']}
+              />
+            </Col>
+            <Col xs={24} sm={24} md={4}>
+              <Button
+                type="primary"
+                icon={<ExportOutlined />}
+                onClick={handleExport}
+                style={{ width: '100%' }}
+              >
+                Export Report
+              </Button>
+            </Col>
+          </Row>
+        </Space>
+      </Card>
 
       {/* Donations Table */}
-      <div className="donations-table-container">
-        <table className="donations-table">
-          <thead>
-            <tr>
-              <th>Donor</th>
-              <th>Amount</th>
-              <th>Category</th>
-              <th>Payment Method</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Transaction ID</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredDonations.map((donation) => (
-              <motion.tr
-                key={donation.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <td>
-                  <div className="donor-info">
-                    <div className="donor-name">{donation.donorName}</div>
-                    <div className="donor-email">{donation.email}</div>
-                  </div>
-                </td>
-                <td>
-                  <div className="amount-info">
-                    <span className="amount">{formatCurrency(donation.amount, donation.currency)}</span>
-                  </div>
-                </td>
-                <td>
-                  <span className={`category-badge ${donation.category.toLowerCase().replace(' ', '-')}`}>
-                    {donation.category}
-                  </span>
-                </td>
-                <td>{donation.paymentMethod}</td>
-                <td>
-                  <span className={`status-badge ${donation.status}`}>
-                    {donation.status}
-                  </span>
-                </td>
-                <td>{new Date(donation.date).toLocaleDateString()}</td>
-                <td>
-                  <span className="transaction-id">{donation.transactionId}</span>
-                </td>
-                <td>
-                  <div className="action-buttons">
-                    <button className="action-btn view-btn">View</button>
-                    <button className="action-btn edit-btn">Edit</button>
-                    {donation.status === 'pending' && (
-                      <button className="action-btn approve-btn">Approve</button>
-                    )}
-                  </div>
-                </td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Card>
+        <Table
+          columns={columns}
+          dataSource={filteredDonations}
+          rowKey="id"
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) => 
+              `${range[0]}-${range[1]} of ${total} donations`,
+          }}
+          scroll={{ x: 1200 }}
+        />
+      </Card>
 
-      {/* Donation Details Modal Placeholder */}
-      <div className="donation-summary">
-        <div className="summary-card">
-          <h3>Recent Donations</h3>
-          <div className="recent-donations">
-            {donations.slice(0, 5).map((donation) => (
-              <div key={donation.id} className="recent-donation-item">
-                <div className="donation-amount">
-                  {formatCurrency(donation.amount, donation.currency)}
-                </div>
-                <div className="donation-info">
-                  <div className="donor-name">{donation.donorName}</div>
-                  <div className="donation-date">{new Date(donation.date).toLocaleDateString()}</div>
-                </div>
-                <div className={`donation-status ${donation.status}`}>
-                  {donation.status}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Donation Details Drawer */}
+      <Drawer
+        title="Donation Details"
+        placement="right"
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        width={600}
+      >
+        {selectedDonation && (
+          <Descriptions bordered column={1}>
+            <Descriptions.Item label="Donor Name">
+              {selectedDonation.donorName}
+            </Descriptions.Item>
+            <Descriptions.Item label="Email">
+              {selectedDonation.email}
+            </Descriptions.Item>
+            <Descriptions.Item label="Amount">
+              <Text strong style={{ color: '#52c41a', fontSize: '18px' }}>
+                {formatCurrency(selectedDonation.amount, selectedDonation.currency)}
+              </Text>
+            </Descriptions.Item>
+            <Descriptions.Item label="Category">
+              <Tag color={getCategoryColor(selectedDonation.category)}>
+                {selectedDonation.category}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Payment Method">
+              {selectedDonation.paymentMethod}
+            </Descriptions.Item>
+            <Descriptions.Item label="Status">
+              <Tag color={getStatusColor(selectedDonation.status)}>
+                {selectedDonation.status.toUpperCase()}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Date">
+              {new Date(selectedDonation.date).toLocaleDateString()}
+            </Descriptions.Item>
+            <Descriptions.Item label="Transaction ID">
+              <Text code copyable>{selectedDonation.transactionId}</Text>
+            </Descriptions.Item>
+            <Descriptions.Item label="Message">
+              {selectedDonation.message || 'No message provided'}
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Drawer>
     </div>
   );
 };

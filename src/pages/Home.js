@@ -48,7 +48,7 @@ const Home = () => {
 
 
   return (
-    <div className="page-container">
+    <div className="home-page-container">
       {/* Hero Section */}
       <motion.section
         className="hero-section"
@@ -111,63 +111,65 @@ const Home = () => {
           </div>
         </motion.section>
 
-        {/* Image Gallery Section */}
+      {/* Image Gallery Section - Full Width */}
         <motion.section
-          className="gallery-section"
+        className="gallery-section full-width"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
+        <div className="container">
           <motion.h2 className="section-title" variants={itemVariants}>
             Our Work in Pictures
           </motion.h2>
           <motion.p className="section-subtitle" variants={itemVariants}>
             Visual stories of transformation and impact across communities
           </motion.p>
-          <div className="image-gallery">
-            <motion.div className="gallery-item large" variants={itemVariants}>
+        </div>
+        <div className="image-gallery full-width">
+          <motion.div className="gallery-item large full-width" variants={itemVariants}>
               <img src={home8} alt="Community Development" className="gallery-image" />
               <div className="gallery-overlay">
                 <h3>Community Development</h3>
                 <p>Building sustainable communities through grassroots initiatives</p>
               </div>
             </motion.div>
-            <motion.div className="gallery-item" variants={itemVariants}>
+          <motion.div className="gallery-item full-width" variants={itemVariants}>
               <img src={home2} alt="Education Programs" className="gallery-image" />
               <div className="gallery-overlay">
                 <h3>Education Programs</h3>
                 <p>Empowering children through quality education</p>
               </div>
             </motion.div>
-            <motion.div className="gallery-item" variants={itemVariants}>
+          <motion.div className="gallery-item full-width" variants={itemVariants}>
               <img src={home3} alt="Healthcare Initiatives" className="gallery-image" />
               <div className="gallery-overlay">
                 <h3>Healthcare Initiatives</h3>
                 <p>Bringing healthcare to remote communities</p>
               </div>
             </motion.div>
-            <motion.div className="gallery-item" variants={itemVariants}>
+          <motion.div className="gallery-item full-width" variants={itemVariants}>
               <img src={home4} alt="Women Empowerment" className="gallery-image" />
               <div className="gallery-overlay">
                 <h3>Women Empowerment</h3>
                 <p>Supporting women's economic independence</p>
               </div>
             </motion.div>
-            <motion.div className="gallery-item" variants={itemVariants}>
+          <motion.div className="gallery-item full-width" variants={itemVariants}>
               <img src={home5} alt="Youth Development" className="gallery-image" />
               <div className="gallery-overlay">
                 <h3>Youth Development</h3>
                 <p>Nurturing young leaders for tomorrow</p>
               </div>
             </motion.div>
-            <motion.div className="gallery-item" variants={itemVariants}>
+          <motion.div className="gallery-item full-width" variants={itemVariants}>
               <img src={home6} alt="Rural Development" className="gallery-image" />
               <div className="gallery-overlay">
                 <h3>Rural Development</h3>
                 <p>Transforming rural communities</p>
               </div>
             </motion.div>
-            <motion.div className="gallery-item" variants={itemVariants}>
+          <motion.div className="gallery-item full-width" variants={itemVariants}>
               <img src={home10} alt="Community Outreach" className="gallery-image" />
               <div className="gallery-overlay">
                 <h3>Community Outreach</h3>

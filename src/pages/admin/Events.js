@@ -1,6 +1,42 @@
 import React, { useState } from 'react';
+import {
+  Card,
+  Row,
+  Col,
+  Statistic,
+  Input,
+  Select,
+  Button,
+  Modal,
+  Form,
+  DatePicker,
+  TimePicker,
+  InputNumber,
+  Tag,
+  Typography,
+  Space,
+  Tooltip,
+  message,
+  Progress
+} from 'antd';
+import {
+  CalendarOutlined,
+  ClockCircleOutlined,
+  SyncOutlined,
+  CheckCircleOutlined,
+  SearchOutlined,
+  PlusOutlined,
+  EditOutlined,
+  EyeOutlined,
+  EnvironmentOutlined,
+  TeamOutlined,
+  UserOutlined
+} from '@ant-design/icons';
 import { motion } from 'framer-motion';
-import '../../styles/pages/admin/Events.css';
+import dayjs from 'dayjs';
+
+const { Title, Text } = Typography;
+const { Option } = Select;
 
 const Events = () => {
   const [events, setEvents] = useState([
@@ -58,20 +94,11 @@ const Events = () => {
     }
   ]);
 
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [newEvent, setNewEvent] = useState({
-    title: '',
-    description: '',
-    date: '',
-    time: '',
-    location: '',
-    capacity: '',
-    category: 'Workshop',
-    organizer: ''
-  });
+  const [form] = Form.useForm();
 
   const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -82,312 +109,390 @@ const Events = () => {
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  const handleAddEvent = (e) => {
-    e.preventDefault();
+  const handleAddEvent = (values) => {
     const event = {
       id: events.length + 1,
-      ...newEvent,
-      capacity: parseInt(newEvent.capacity),
+      title: values.title,
+      description: values.description,
+      date: values.date.format('YYYY-MM-DD'),
+      time: values.time.format('HH:mm A'),
+      location: values.location,
+      capacity: values.capacity,
       registered: 0,
-      status: 'upcoming'
+      status: 'upcoming',
+      category: values.category,
+      organizer: values.organizer
     };
     setEvents([...events, event]);
-    setNewEvent({
-      title: '',
-      description: '',
-      date: '',
-      time: '',
-      location: '',
-      capacity: '',
-      category: 'Workshop',
-      organizer: ''
-    });
-    setShowAddForm(false);
+    form.resetFields();
+    setShowAddModal(false);
+    message.success('Event created successfully!');
   };
 
   const handleStatusChange = (eventId, newStatus) => {
     setEvents(events.map(event => 
       event.id === eventId ? { ...event, status: newStatus } : event
     ));
+    message.success(`Event status updated to ${newStatus}`);
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'upcoming': return '#007BFF';
-      case 'ongoing': return '#28A745';
-      case 'completed': return '#6C757D';
-      case 'cancelled': return '#DC3545';
-      default: return '#6C757D';
+      case 'upcoming': return 'blue';
+      case 'ongoing': return 'green';
+      case 'completed': return 'default';
+      case 'cancelled': return 'red';
+      default: return 'default';
     }
   };
 
   const getCategoryColor = (category) => {
     switch (category) {
-      case 'Workshop': return '#007BFF';
-      case 'Community Service': return '#28A745';
-      case 'Health': return '#DC3545';
-      case 'Education': return '#FFC107';
-      default: return '#6C757D';
+      case 'Workshop': return 'blue';
+      case 'Community Service': return 'green';
+      case 'Health': return 'red';
+      case 'Education': return 'orange';
+      default: return 'default';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'upcoming': return <CalendarOutlined />;
+      case 'ongoing': return <SyncOutlined spin />;
+      case 'completed': return <CheckCircleOutlined />;
+      case 'cancelled': return <ClockCircleOutlined />;
+      default: return <CalendarOutlined />;
     }
   };
 
   return (
-    <div className="admin-events">
-      <div className="events-header">
-        <h1>Events Management</h1>
-        <p>Manage and organize events for the organization</p>
+    <div>
+      {/* Page Header */}
+      <div style={{ marginBottom: '24px' }}>
+        <Title level={2} style={{ marginBottom: '8px', color: '#1890ff' }}>
+          Events Management
+        </Title>
+        <Text type="secondary" style={{ fontSize: '16px' }}>
+          Manage and organize events for the organization
+        </Text>
       </div>
 
       {/* Statistics Cards */}
-      <motion.div 
-        className="events-stats"
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="stat-card">
-          <div className="stat-icon">📅</div>
-          <div className="stat-content">
-            <h3>{events.length}</h3>
-            <p>Total Events</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">⏳</div>
-          <div className="stat-content">
-            <h3>{events.filter(e => e.status === 'upcoming').length}</h3>
-            <p>Upcoming</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">🔄</div>
-          <div className="stat-content">
-            <h3>{events.filter(e => e.status === 'ongoing').length}</h3>
-            <p>Ongoing</p>
-          </div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon">✅</div>
-          <div className="stat-content">
-            <h3>{events.filter(e => e.status === 'completed').length}</h3>
-            <p>Completed</p>
-          </div>
-        </div>
+        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Total Events"
+                value={events.length}
+                prefix={<CalendarOutlined style={{ color: '#1890ff' }} />}
+                valueStyle={{ color: '#1890ff' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Upcoming"
+                value={events.filter(e => e.status === 'upcoming').length}
+                prefix={<ClockCircleOutlined style={{ color: '#faad14' }} />}
+                valueStyle={{ color: '#faad14' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Ongoing"
+                value={events.filter(e => e.status === 'ongoing').length}
+                prefix={<SyncOutlined style={{ color: '#52c41a' }} />}
+                valueStyle={{ color: '#52c41a' }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Statistic
+                title="Completed"
+                value={events.filter(e => e.status === 'completed').length}
+                prefix={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
+                valueStyle={{ color: '#52c41a' }}
+              />
+            </Card>
+          </Col>
+        </Row>
       </motion.div>
 
       {/* Controls */}
-      <div className="events-controls">
-        <div className="search-section">
-          <input
-            type="text"
-            placeholder="Search events..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
-        
-        <div className="filters-section">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Status</option>
-            <option value="upcoming">Upcoming</option>
-            <option value="ongoing">Ongoing</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-          
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Categories</option>
-            <option value="Workshop">Workshop</option>
-            <option value="Community Service">Community Service</option>
-            <option value="Health">Health</option>
-            <option value="Education">Education</option>
-          </select>
-        </div>
-
-        <button
-          className="add-event-btn"
-          onClick={() => setShowAddForm(true)}
-        >
-          + Create Event
-        </button>
-      </div>
-
-      {/* Add Event Form */}
-      {showAddForm && (
-        <motion.div
-          className="add-event-form"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <h3>Create New Event</h3>
-          <form onSubmit={handleAddEvent}>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Event Title</label>
-                <input
-                  type="text"
-                  value={newEvent.title}
-                  onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Category</label>
-                <select
-                  value={newEvent.category}
-                  onChange={(e) => setNewEvent({...newEvent, category: e.target.value})}
-                >
-                  <option value="Workshop">Workshop</option>
-                  <option value="Community Service">Community Service</option>
-                  <option value="Health">Health</option>
-                  <option value="Education">Education</option>
-                </select>
-              </div>
-            </div>
-            <div className="form-group">
-              <label>Description</label>
-              <textarea
-                value={newEvent.description}
-                onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
-                rows="3"
-                required
-              />
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Date</label>
-                <input
-                  type="date"
-                  value={newEvent.date}
-                  onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Time</label>
-                <input
-                  type="time"
-                  value={newEvent.time}
-                  onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
-                  required
-                />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Location</label>
-                <input
-                  type="text"
-                  value={newEvent.location}
-                  onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Capacity</label>
-                <input
-                  type="number"
-                  value={newEvent.capacity}
-                  onChange={(e) => setNewEvent({...newEvent, capacity: e.target.value})}
-                  min="1"
-                  required
-                />
-              </div>
-            </div>
-            <div className="form-group">
-              <label>Organizer</label>
-              <input
-                type="text"
-                value={newEvent.organizer}
-                onChange={(e) => setNewEvent({...newEvent, organizer: e.target.value})}
-                required
-              />
-            </div>
-            <div className="form-actions">
-              <button type="submit" className="save-btn">Create Event</button>
-              <button type="button" className="cancel-btn" onClick={() => setShowAddForm(false)}>
-                Cancel
-              </button>
-            </div>
-          </form>
-        </motion.div>
-      )}
+      <Card style={{ marginBottom: '24px' }}>
+        <Row gutter={[16, 16]} align="middle">
+          <Col xs={24} sm={24} md={8}>
+            <Input
+              placeholder="Search events..."
+              prefix={<SearchOutlined />}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              allowClear
+            />
+          </Col>
+          <Col xs={24} sm={8} md={4}>
+            <Select
+              placeholder="Status"
+              value={statusFilter}
+              onChange={setStatusFilter}
+              style={{ width: '100%' }}
+            >
+              <Option value="all">All Status</Option>
+              <Option value="upcoming">Upcoming</Option>
+              <Option value="ongoing">Ongoing</Option>
+              <Option value="completed">Completed</Option>
+              <Option value="cancelled">Cancelled</Option>
+            </Select>
+          </Col>
+          <Col xs={24} sm={8} md={4}>
+            <Select
+              placeholder="Category"
+              value={categoryFilter}
+              onChange={setCategoryFilter}
+              style={{ width: '100%' }}
+            >
+              <Option value="all">All Categories</Option>
+              <Option value="Workshop">Workshop</Option>
+              <Option value="Community Service">Community Service</Option>
+              <Option value="Health">Health</Option>
+              <Option value="Education">Education</Option>
+            </Select>
+          </Col>
+          <Col xs={24} sm={24} md={8}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setShowAddModal(true)}
+              style={{ width: '100%' }}
+            >
+              Create Event
+            </Button>
+          </Col>
+        </Row>
+      </Card>
 
       {/* Events Grid */}
-      <div className="events-grid">
+      <Row gutter={[16, 16]}>
         {filteredEvents.map((event) => (
-          <motion.div
-            key={event.id}
-            className="event-card"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="event-header">
-              <div className="event-status" style={{ backgroundColor: getStatusColor(event.status) }}>
-                {event.status}
-              </div>
-              <div className="event-category" style={{ backgroundColor: getCategoryColor(event.category) }}>
-                {event.category}
-              </div>
-            </div>
-            
-            <div className="event-content">
-              <h3 className="event-title">{event.title}</h3>
-              <p className="event-description">{event.description}</p>
-              
-              <div className="event-details">
-                <div className="detail-item">
-                  <span className="detail-icon">📅</span>
-                  <span>{new Date(event.date).toLocaleDateString()}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-icon">🕒</span>
-                  <span>{event.time}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-icon">📍</span>
-                  <span>{event.location}</span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-icon">👥</span>
-                  <span>{event.registered}/{event.capacity} registered</span>
-                </div>
-              </div>
-              
-              <div className="event-organizer">
-                <span className="organizer-label">Organized by:</span>
-                <span className="organizer-name">{event.organizer}</span>
-              </div>
-            </div>
-            
-            <div className="event-actions">
-              <button className="action-btn edit-btn">Edit</button>
-              <button className="action-btn view-btn">View Details</button>
-              <select
-                value={event.status}
-                onChange={(e) => handleStatusChange(event.id, e.target.value)}
-                className="status-select"
+          <Col xs={24} sm={12} lg={8} xl={6} key={event.id}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card
+                hoverable
+                style={{ height: '100%' }}
+                actions={[
+                  <Tooltip title="Edit">
+                    <EditOutlined key="edit" />
+                  </Tooltip>,
+                  <Tooltip title="View Details">
+                    <EyeOutlined key="view" />
+                  </Tooltip>,
+                  <Select
+                    key="status"
+                    value={event.status}
+                    onChange={(value) => handleStatusChange(event.id, value)}
+                    size="small"
+                    style={{ width: '90px' }}
+                  >
+                    <Option value="upcoming">Upcoming</Option>
+                    <Option value="ongoing">Ongoing</Option>
+                    <Option value="completed">Completed</Option>
+                    <Option value="cancelled">Cancelled</Option>
+                  </Select>
+                ]}
               >
-                <option value="upcoming">Upcoming</option>
-                <option value="ongoing">Ongoing</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-          </motion.div>
+                <div style={{ marginBottom: '12px' }}>
+                  <Space>
+                    <Tag color={getStatusColor(event.status)} icon={getStatusIcon(event.status)}>
+                      {event.status.toUpperCase()}
+                    </Tag>
+                    <Tag color={getCategoryColor(event.category)}>
+                      {event.category}
+                    </Tag>
+                  </Space>
+                </div>
+                
+                <Title level={4} style={{ marginBottom: '8px' }}>
+                  {event.title}
+                </Title>
+                
+                <Text type="secondary" style={{ display: 'block', marginBottom: '16px' }}>
+                  {event.description}
+                </Text>
+                
+                <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <CalendarOutlined style={{ color: '#1890ff' }} />
+                    <Text>{new Date(event.date).toLocaleDateString()}</Text>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <ClockCircleOutlined style={{ color: '#1890ff' }} />
+                    <Text>{event.time}</Text>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <EnvironmentOutlined style={{ color: '#1890ff' }} />
+                    <Text>{event.location}</Text>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <TeamOutlined style={{ color: '#1890ff' }} />
+                    <Text>{event.registered}/{event.capacity} registered</Text>
+                  </div>
+                </Space>
+                
+                <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #f0f0f0' }}>
+                  <Space>
+                    <UserOutlined style={{ color: '#666' }} />
+                    <Text type="secondary">Organized by: </Text>
+                    <Text strong style={{ color: '#1890ff' }}>{event.organizer}</Text>
+                  </Space>
+                </div>
+                
+                <div style={{ marginTop: '12px' }}>
+                  <Text type="secondary" style={{ fontSize: '12px' }}>Registration Progress</Text>
+                  <Progress 
+                    percent={Math.round((event.registered / event.capacity) * 100)} 
+                    size="small"
+                    status={event.registered === event.capacity ? 'success' : 'active'}
+                  />
+                </div>
+              </Card>
+            </motion.div>
+          </Col>
         ))}
-      </div>
+      </Row>
+
+      {/* Add Event Modal */}
+      <Modal
+        title="Create New Event"
+        open={showAddModal}
+        onCancel={() => {
+          setShowAddModal(false);
+          form.resetFields();
+        }}
+        footer={null}
+        width={800}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleAddEvent}
+        >
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="title"
+                label="Event Title"
+                rules={[{ required: true, message: 'Please enter event title' }]}
+              >
+                <Input placeholder="Enter event title" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="category"
+                label="Category"
+                rules={[{ required: true, message: 'Please select category' }]}
+              >
+                <Select placeholder="Select category">
+                  <Option value="Workshop">Workshop</Option>
+                  <Option value="Community Service">Community Service</Option>
+                  <Option value="Health">Health</Option>
+                  <Option value="Education">Education</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+          
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[{ required: true, message: 'Please enter description' }]}
+          >
+            <Input.TextArea rows={3} placeholder="Enter event description" />
+          </Form.Item>
+          
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="date"
+                label="Date"
+                rules={[{ required: true, message: 'Please select date' }]}
+              >
+                <DatePicker style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="time"
+                label="Time"
+                rules={[{ required: true, message: 'Please select time' }]}
+              >
+                <TimePicker style={{ width: '100%' }} format="HH:mm A" />
+              </Form.Item>
+            </Col>
+          </Row>
+          
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="location"
+                label="Location"
+                rules={[{ required: true, message: 'Please enter location' }]}
+              >
+                <Input placeholder="Enter event location" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="capacity"
+                label="Capacity"
+                rules={[{ required: true, message: 'Please enter capacity' }]}
+              >
+                <InputNumber 
+                  min={1} 
+                  placeholder="Enter capacity" 
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          
+          <Form.Item
+            name="organizer"
+            label="Organizer"
+            rules={[{ required: true, message: 'Please enter organizer name' }]}
+          >
+            <Input placeholder="Enter organizer name" />
+          </Form.Item>
+          
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={() => {
+                setShowAddModal(false);
+                form.resetFields();
+              }}>
+                Cancel
+              </Button>
+              <Button type="primary" htmlType="submit">
+                Create Event
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
